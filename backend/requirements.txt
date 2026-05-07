@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 motor
-pymongo
+pymongo[srv]
 python-dotenv
 PyJWT
 bcrypt
@@ -16,3 +16,5 @@ pydantic-settings
 httpx
 requests
 aiofiles
+certifi
+dnspython
