@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/quantum-chat/static/css/main.c313efbe.css",
+    "main.js": "/quantum-chat/static/js/main.eded7091.js",
+    "index.html": "/quantum-chat/index.html",
+    "main.c313efbe.css.map": "/quantum-chat/static/css/main.c313efbe.css.map",
+    "main.eded7091.js.map": "/quantum-chat/static/js/main.eded7091.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c313efbe.css",
+    "static/js/main.eded7091.js"
+  ]
+}
