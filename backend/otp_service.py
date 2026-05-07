@@ -55,12 +55,31 @@ def send_email_otp(email: str, otp_code: str) -> bool:
         )
         msg.attach(MIMEText(body, "plain"))
 
-        logger.info(f"Attempting SMTP send to {email} using sender {smtp_email}")
-        with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
-            server.set_debuglevel(1)
-            server.starttls()
-            server.login(smtp_email, smtp_password)
-            server.send_message(msg)
+        brevo_api_key = os.environ.get("BREVO_API_KEY")
+        if brevo_api_key:
+            import requests
+            logger.info(f"Attempting HTTP send to {email} using Brevo API")
+            url = "https://api.brevo.com/v3/smtp/email"
+            payload = {
+                "sender": {"email": smtp_email, "name": "Quantum-Safe Chat"},
+                "to": [{"email": email}],
+                "subject": "Quantum-Safe Chat - Verification Code",
+                "htmlContent": f"<html><body><p>Your verification code is: <b>{otp_code}</b></p><p>This code is valid for 5 minutes.<br>Do not share this code with anyone.</p><p>- Quantum-Safe Secure Chat</p></body></html>"
+            }
+            headers = {
+                "accept": "application/json",
+                "api-key": brevo_api_key,
+                "content-type": "application/json"
+            }
+            response = requests.post(url, json=payload, headers=headers)
+            response.raise_for_status()
+        else:
+            logger.info(f"Attempting SMTP send to {email} using sender {smtp_email}")
+            with smtplib.SMTP("smtp.gmail.com", 587, timeout=15) as server:
+                server.set_debuglevel(1)
+                server.starttls()
+                server.login(smtp_email, smtp_password)
+                server.send_message(msg)
 
         logger.info(f"Email OTP sent successfully to {email}")
         return True
