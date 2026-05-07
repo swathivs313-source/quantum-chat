@@ -2,9 +2,7 @@ import axios from "axios";
 
 // Detect if running inside Capacitor (native mobile app)
 const isCapacitor = typeof window !== "undefined" && (window.Capacitor || window.location.protocol === "capacitor:");
-const BACKEND_BASE = isCapacitor
-  ? (process.env.REACT_APP_BACKEND_URL || "https://sympathy-endearing-afternoon.ngrok-free.dev")
-  : "";
+const BACKEND_BASE = process.env.REACT_APP_BACKEND_URL || "https://quantum-chat-api-b11e.onrender.com";
 
 const api = axios.create({
   baseURL: BACKEND_BASE,

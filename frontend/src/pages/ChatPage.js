@@ -63,9 +63,8 @@ const decryptHybridMessage = async (msg, myKeys, peerXPub, peerDilithiumPub) => 
 };
 
 const _isCapacitor = typeof window !== "undefined" && (window.Capacitor || window.location.protocol === "capacitor:");
-const _ngrokUrl = process.env.REACT_APP_BACKEND_URL || "https://sympathy-endearing-afternoon.ngrok-free.dev";
-const BACKEND_URL = _isCapacitor ? _ngrokUrl : window.location.origin;
-const WS_URL = _isCapacitor ? _ngrokUrl.replace(/^http/, "ws") : window.location.origin.replace(/^http/, "ws");
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://quantum-chat-api-b11e.onrender.com";
+const WS_URL = BACKEND_URL.replace(/^http/, "ws");
 
 function formatTime(timestamp) {
   if (!timestamp) return "";

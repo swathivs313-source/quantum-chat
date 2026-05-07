@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://swathivs313-source.github.io/quantum-chat",
   "dependencies": {
     "@capacitor/android": "^8.3.1",
     "@capacitor/cli": "^8.3.1",
@@ -62,6 +63,8 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "build:prod": "craco build && xcopy /E /I /Y build ..\\backend\\static",
     "test": "craco test"
   },
@@ -89,6 +92,7 @@
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react": "7.37.4",
     "eslint-plugin-react-hooks": "5.2.0",
+    "gh-pages": "^6.3.0",
     "globals": "15.15.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17"

@@ -58,6 +58,15 @@ db = client[os.environ["DB_NAME"]]
 
 # ── APP ───────────────────────────────────────────────────────────────────────
 app = FastAPI(title="Trunex", version="1.0.0", redirect_slashes=False)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 api_router = APIRouter(prefix="/api", redirect_slashes=False)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
