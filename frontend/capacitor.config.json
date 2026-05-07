@@ -1,0 +1,9 @@
+{
+  "appId": "com.trunex.chat",
+  "appName": "Trunex",
+  "webDir": "build",
+  "server": {
+    "allowNavigation": ["sympathy-endearing-afternoon.ngrok-free.dev", "*.ngrok-free.dev"],
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "theme": "dark",
+  "archetype": "4 - Swiss & High-Contrast (Cybersecurity Variant)",
+  "colors": {
+    "background": "#0B0F14",
+    "foreground": "#F8FAFC",
+    "card": "#121821",
+    "card_foreground": "#F8FAFC",
+    "popover": "#121821",
+    "popover_foreground": "#F8FAFC",
+    "primary": "#10B981",
+    "primary_foreground": "#0B0F14",
+    "secondary": "#1E293B",
+    "secondary_foreground": "#F8FAFC",
+    "muted": "#1E293B",
+    "muted_foreground": "#94A3B8",
+    "accent": "#10B981",
+    "accent_foreground": "#0B0F14",
+    "destructive": "#EF4444",
+    "destructive_foreground": "#F8FAFC",
+    "border": "rgba(255, 255, 255, 0.05)",
+    "input": "rgba(255, 255, 255, 0.05)",
+    "ring": "#10B981"
+  },
+  "typography": {
+    "font_families": {
+      "heading": "Outfit, sans-serif",
+      "body": "Manrope, sans-serif",
+      "mono": "'JetBrains Mono', monospace"
+    },
+    "rules": {
+      "h1": "text-4xl sm:text-5xl font-bold tracking-tight",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-medium",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed text-muted-foreground",
+      "small": "text-sm text-muted-foreground",
+      "labels": "text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground"
+    }
+  },
+  "layout_and_spacing": {
+    "spacing_scale": "Tailwind default scale (generous spacing preferred, e.g., p-8 or p-12 for containers)",
+    "border_radius": "rounded-xl (12px) for main cards, rounded-lg (8px) for inputs and buttons",
+    "glassmorphism": "backdrop-blur-xl bg-[#0B0F14]/70 border-b border-white/5 for sticky headers and navigation",
+    "admin_dashboard_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6. Dense 'Control Room' style layout."
+  },
+  "components": {
+    "buttons": "Flat backgrounds for primary (#10B981), subtle hover states (brightness increase), 1px solid border for secondary buttons (border-white/10) with text-white hover.",
+    "inputs": "bg-[#121821] border-white/10 rounded-lg focus:ring-2 focus:ring-[#10B981]/50 focus:border-[#10B981] text-white placeholder:text-muted-foreground",
+    "cards": "bg-[#121821] border border-white/5 rounded-xl shadow-[0_4px_24px_rgba(16,185,129,0.03)] hover:shadow-[0_4px_24px_rgba(16,185,129,0.08)] transition-all duration-300",
+    "chat_bubbles": "Sent: bg-[#10B981] text-[#0B0F14] rounded-2xl rounded-tr-sm. Received: bg-[#1E293B] text-[#F8FAFC] rounded-2xl rounded-tl-sm.",
+    "badges": "Font-mono text-xs uppercase px-2 py-1 rounded-md bg-white/5 border border-white/10."
+  },
+  "motion_and_interactions": {
+    "hover_states": "Subtle brightness adjustments, border color changes. e.g., hover:border-[#10B981]/50",
+    "transitions": "transition-all duration-200 ease-in-out",
+    "chat_messages": "Staggered fade-up entry animations for new messages (framer-motion).",
+    "accessibility": "respect prefers-reduced-motion"
+  },
+  "icons": {
+    "library": "lucide-react",
+    "instructions": "Use for all UI elements. Ensure stroke width is consistent (typically 2px). Use filled variants only when active."
+  },
+  "media": {
+    "images": [
+      {
+        "category": "login_background",
+        "url": "https://static.prod-images.emergentagent.com/jobs/cafcabc8-c2cd-4ce2-9178-486ea0ee313b/images/8f712a446e7fafed8d65fa82018a2e42d637f455296359a6e69527bc563b81e3.png",
+        "description": "Abstract dark cybersecurity background with emerald green data nodes"
+      },
+      {
+        "category": "dashboard_header_background",
+        "url": "https://static.prod-images.emergentagent.com/jobs/cafcabc8-c2cd-4ce2-9178-486ea0ee313b/images/4308fac628c2fd6f3ef08f86c59a66067a51ac03fc7f13e23193a1bfd98ae0c1.png",
+        "description": "Minimalist abstract dark tech pattern for admin dashboard header"
+      },
+      {
+        "category": "avatar_1",
+        "url": "https://images.unsplash.com/photo-1758534063829-a72058381e21?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMGRhcmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3NjM0NjAwNnww&ixlib=rb-4.1.0&q=85",
+        "description": "Professional headshot for chat contact"
+      },
+      {
+        "category": "avatar_2",
+        "url": "https://images.unsplash.com/photo-1769636929231-3cd7f853d038?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2Mzl8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMGRhcmslMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3NjM0NjAwNnww&ixlib=rb-4.1.0&q=85",
+        "description": "Professional headshot for chat contact"
+      },
+      {
+        "category": "avatar_3",
+        "url": "https://images.pexels.com/photos/262391/pexels-photo-262391.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Professional headshot for chat contact"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install 'lucide-react' if not present.",
+    "Add Google Fonts for 'Outfit', 'Manrope', and 'JetBrains Mono' in index.html or layout wrapper.",
+    "Apply the base colors to Tailwind config strictly as defined. Do NOT use pure black (#000000); use the provided #0B0F14.",
+    "For the Login page: use the 'login_background' image with an overlay of `bg-[#0B0F14]/80` and `backdrop-blur-sm` for the login card container.",
+    "Chat Window: Use the defined chat_bubbles rules. The encryption status indicator should be a small pill badge using JetBrains Mono with a glowing green dot.",
+    "Admin Dashboard: Implement a tight bento-grid layout for metrics. Failed logins should use the destructive color (#EF4444) for alerts.",
+    "All interactive elements must include 'data-testid' (e.g., data-testid='login-button').",
+    "Use Shadcn UI components for dropdowns, inputs, and forms, but strip their default borders/colors and apply the custom styling defined above (border-white/5, bg-[#121821])."
+  ]
+}

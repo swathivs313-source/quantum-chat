@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Trunex</string>
+    <string name="title_activity_main">Trunex</string>
+    <string name="package_name">com.trunex.chat</string>
+    <string name="custom_url_scheme">com.trunex.chat</string>
+</resources>

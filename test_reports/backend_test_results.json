@@ -1,0 +1,236 @@
+{
+  "timestamp": "2026-04-16T14:23:59.692810",
+  "total_tests": 38,
+  "passed_tests": 36,
+  "success_rate": 94.73684210526315,
+  "results": [
+    {
+      "test": "API Root",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:54.654481"
+    },
+    {
+      "test": "Health Check",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:54.734062"
+    },
+    {
+      "test": "Unauthorized Auth Check",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-16T14:23:54.832212"
+    },
+    {
+      "test": "Unauthorized User Search",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-16T14:23:54.907924"
+    },
+    {
+      "test": "Unauthorized Get Chats",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-16T14:23:54.976552"
+    },
+    {
+      "test": "Unauthorized Admin Stats",
+      "success": true,
+      "details": "Status: 401",
+      "timestamp": "2026-04-16T14:23:55.041937"
+    },
+    {
+      "test": "User Registration",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:55.326922"
+    },
+    {
+      "test": "OTP Verification",
+      "success": false,
+      "details": "Status: 400, Expected: 200, Error: No pending OTP found or OTP expired",
+      "timestamp": "2026-04-16T14:23:55.402715"
+    },
+    {
+      "test": "Admin Login",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:56.282977"
+    },
+    {
+      "test": "Admin Login OTP",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:56.381900"
+    },
+    {
+      "test": "Demo User Login",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.230456"
+    },
+    {
+      "test": "Demo User Login OTP",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.313783"
+    },
+    {
+      "test": "Auth Check",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.384704"
+    },
+    {
+      "test": "Logout",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.457970"
+    },
+    {
+      "test": "User Search (empty)",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.530939"
+    },
+    {
+      "test": "User Search (alice)",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.616342"
+    },
+    {
+      "test": "Get Chats",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.678163"
+    },
+    {
+      "test": "Search for Chat Partner",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.735122"
+    },
+    {
+      "test": "Create Chat",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.803092"
+    },
+    {
+      "test": "Get Messages",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.872082"
+    },
+    {
+      "test": "Send Message",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:57.950977"
+    },
+    {
+      "test": "Search Users for Group",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.025877"
+    },
+    {
+      "test": "Create Group",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.095731"
+    },
+    {
+      "test": "Get Group Members",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.176762"
+    },
+    {
+      "test": "Get Group Messages",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.254278"
+    },
+    {
+      "test": "Send Group Message",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.317276"
+    },
+    {
+      "test": "Add Group Member",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.381415"
+    },
+    {
+      "test": "Get Chats (verify group)",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.449467"
+    },
+    {
+      "test": "Group in Chats List",
+      "success": true,
+      "details": "Group should appear in chats with is_group=true",
+      "timestamp": "2026-04-16T14:23:58.449523"
+    },
+    {
+      "test": "File Upload",
+      "success": true,
+      "details": "File ID: 69e0f0fe23da133bc68acfa0",
+      "timestamp": "2026-04-16T14:23:58.711668"
+    },
+    {
+      "test": "File Download",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:58.876439"
+    },
+    {
+      "test": "Send File Message",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:59.035771"
+    },
+    {
+      "test": "Registration with Redis OTP",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:59.352140"
+    },
+    {
+      "test": "Invalid OTP (Redis retry)",
+      "success": true,
+      "details": "Status: 400",
+      "timestamp": "2026-04-16T14:23:59.415226"
+    },
+    {
+      "test": "Valid OTP (Redis verification)",
+      "success": false,
+      "details": "Status: 400, Expected: 200, Error: No pending OTP found or OTP expired",
+      "timestamp": "2026-04-16T14:23:59.474489"
+    },
+    {
+      "test": "Admin Stats",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:59.536785"
+    },
+    {
+      "test": "Admin Users",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:59.605714"
+    },
+    {
+      "test": "Admin Login Logs",
+      "success": true,
+      "details": "Status: 200",
+      "timestamp": "2026-04-16T14:23:59.692612"
+    }
+  ]
+}
