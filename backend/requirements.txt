@@ -3,8 +3,9 @@ uvicorn
 motor
 pymongo
 python-dotenv
-python-jose[cryptography]
-passlib[bcrypt]
+PyJWT
+bcrypt
+cryptography
 python-multipart
 email-validator
 websockets
