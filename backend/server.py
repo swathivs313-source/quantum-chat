@@ -62,7 +62,7 @@ app = FastAPI(title="Trunex", version="1.0.0", redirect_slashes=False)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
