@@ -1292,7 +1292,8 @@ app.add_middleware(
 frontend_build_path = os.path.join(os.path.dirname(__file__), "static")
 
 if os.path.exists(frontend_build_path):
-    app.mount("/", StaticFiles(directory=frontend_build_path, html=True), name="static")
+    app.mount("/quantum-chat", StaticFiles(directory="static", html=True), name="static_qc")
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 @app.exception_handler(404)
 async def custom_404_handler(request: Request, __):
