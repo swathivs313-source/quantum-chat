@@ -23,36 +23,48 @@ import { hkdf } from "@noble/hashes/hkdf.js";
 import { pqcEncapsulate, pqcDecapsulate, pqcSign, pqcVerify } from "@/lib/pqc";
 
 // ── HYBRID PQC DECRYPTION HELPER ───────────────────────────────────────────
-const decryptHybridMessage = async (msg, myKeys, peerXPub, peerDilithiumPub) => {
+const decryptHybridMessage = async (msg, myKeys, peerXPub, peerDilithiumPub, isMine, userPubKey) => {
   try {
     const bundle = JSON.parse(msg.content);
     if (!bundle.ciphertext || !bundle.kem_ct) return msg.content;
 
+    let targetCiphertext = bundle.ciphertext;
+    let targetNonce = bundle.nonce;
+    let targetKemCt = bundle.kem_ct;
+    let targetPeerXPub = peerXPub;
+
+    if (isMine && bundle.kem_ct_mine) {
+      targetCiphertext = bundle.ciphertext_mine;
+      targetNonce = bundle.nonce_mine;
+      targetKemCt = bundle.kem_ct_mine;
+      targetPeerXPub = userPubKey;
+    }
+
     // 1. Classical ECDH
     const myXPriv = Uint8Array.from(atob(myKeys.x25519), c => c.charCodeAt(0));
-    const peerXPubBytes = Uint8Array.from(atob(peerXPub), c => c.charCodeAt(0));
+    const peerXPubBytes = Uint8Array.from(atob(targetPeerXPub), c => c.charCodeAt(0));
     const s1 = x25519.getSharedSecret(myXPriv, peerXPubBytes);
 
     // 2. Quantum Decapsulation
-    const s2 = pqcDecapsulate(bundle.kem_ct, myKeys.kyber);
+    const s2 = pqcDecapsulate(targetKemCt, myKeys.kyber);
 
     // 3. Fusion
     const combined = new Uint8Array(s1.length + s2.length);
     combined.set(s1); combined.set(s2, s1.length);
     const finalSecret = hkdf(sha256, combined, undefined, new TextEncoder().encode("trunex-hybrid-pqc"), 32);
 
-    // 4. Verify Signature (Dilithium)
-    if (msg.dilithium_signature && peerDilithiumPub) {
-      const isSigOk = pqcVerify(msg.dilithium_signature, Uint8Array.from(atob(bundle.ciphertext), c => c.charCodeAt(0)), peerDilithiumPub);
+    // 4. Verify Signature (Dilithium) - only for received messages
+    if (!isMine && msg.dilithium_signature && peerDilithiumPub) {
+      const isSigOk = pqcVerify(msg.dilithium_signature, Uint8Array.from(atob(targetCiphertext), c => c.charCodeAt(0)), peerDilithiumPub);
       if (!isSigOk) console.warn("PQC Signature Verification Failed!");
     }
 
     // 5. AES-GCM Decrypt
     const cryptoKey = await window.crypto.subtle.importKey("raw", finalSecret, "AES-GCM", false, ["decrypt"]);
     const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: Uint8Array.from(atob(bundle.nonce), c => c.charCodeAt(0)) },
+      { name: "AES-GCM", iv: Uint8Array.from(atob(targetNonce), c => c.charCodeAt(0)) },
       cryptoKey,
-      Uint8Array.from(atob(bundle.ciphertext), c => c.charCodeAt(0))
+      Uint8Array.from(atob(targetCiphertext), c => c.charCodeAt(0))
     );
     
     return new TextDecoder().decode(decrypted);
@@ -368,10 +380,36 @@ export default function ChatPage() {
         const cryptoKey = await window.crypto.subtle.importKey("raw", finalSecret, "AES-GCM", false, ["encrypt"]);
         const ciphertext = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, enc.encode(content));
         
+        // 2b. Quantum KEM (Kyber) for Sender (Self)
+        let ciphertext_mine, iv_mine, kem_ct_mine;
+        try {
+          const myPubKeysRaw = localStorage.getItem(`pqc_pub_${user.id}`);
+          if (myPubKeysRaw) {
+            const myPubKeys = JSON.parse(myPubKeysRaw);
+            const myXPub = Uint8Array.from(atob(user.public_key), c => c.charCodeAt(0));
+            const s1_mine = x25519.getSharedSecret(myXPriv, myXPub);
+            const { sharedSecret: s2_mine, ciphertext: kem_ct_m } = pqcEncapsulate(myPubKeys.kyber);
+            kem_ct_mine = kem_ct_m;
+            
+            const combined_mine = new Uint8Array(s1_mine.length + s2_mine.length);
+            combined_mine.set(s1_mine); combined_mine.set(s2_mine, s1_mine.length);
+            const finalSecret_mine = hkdf(sha256, combined_mine, undefined, new TextEncoder().encode("trunex-hybrid-pqc"), 32);
+            
+            iv_mine = window.crypto.getRandomValues(new Uint8Array(12));
+            const cryptoKey_mine = await window.crypto.subtle.importKey("raw", finalSecret_mine, "AES-GCM", false, ["encrypt"]);
+            ciphertext_mine = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv: iv_mine }, cryptoKey_mine, enc.encode(content));
+          }
+        } catch(e) { console.error("Self encryption failed:", e); }
+
         const encryptedBundle = {
           ciphertext: btoa(String.fromCharCode(...new Uint8Array(ciphertext))),
           nonce: btoa(String.fromCharCode(...iv)),
-          kem_ct: kem_ct
+          kem_ct: kem_ct,
+          ...(ciphertext_mine && {
+            ciphertext_mine: btoa(String.fromCharCode(...new Uint8Array(ciphertext_mine))),
+            nonce_mine: btoa(String.fromCharCode(...iv_mine)),
+            kem_ct_mine: kem_ct_mine
+          })
         };
 
         // 5. Dilithium Digital Signature
@@ -927,7 +965,8 @@ function DecryptedText({ msg, selectedChat, user }) {
       if (!myKeysRaw || selectedChat.is_group) return; 
 
       const myKeys = JSON.parse(myKeysRaw);
-      const dec = await decryptHybridMessage(msg, myKeys, selectedChat.participant.public_key, selectedChat.participant.dilithium_pubkey);
+      const isMine = msg.sender_id === user.id;
+      const dec = await decryptHybridMessage(msg, myKeys, selectedChat.participant.public_key, selectedChat.participant.dilithium_pubkey, isMine, user.public_key);
       setText(dec);
     };
     run();
