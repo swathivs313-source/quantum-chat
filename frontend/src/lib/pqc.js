@@ -29,10 +29,10 @@ export const generatePQCKeypair = () => {
 
 export const pqcEncapsulate = (publicKeyBase64) => {
   const pubKey = base64ToBytes(publicKeyBase64);
-  const { sharedSecret, ciphertext } = ml_kem768.encapsulate(pubKey);
+  const { sharedSecret, cipherText } = ml_kem768.encapsulate(pubKey);
   return {
     sharedSecret: sharedSecret,
-    ciphertext: bytesToBase64(ciphertext),
+    ciphertext: bytesToBase64(cipherText),
   };
 };
 
