@@ -3,7 +3,7 @@
   "appName": "Trunex",
   "webDir": "build",
   "server": {
-    "allowNavigation": ["sympathy-endearing-afternoon.ngrok-free.dev", "*.ngrok-free.dev"],
+    "allowNavigation": ["quantum-chat-api-b11e.onrender.com", "*.onrender.com"],
     "androidScheme": "https"
   }
 }

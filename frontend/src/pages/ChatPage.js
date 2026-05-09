@@ -39,7 +39,7 @@ const decryptHybridMessage = async (msg, myKeys, peerXPub, peerDilithiumPub) => 
     // 3. Fusion
     const combined = new Uint8Array(s1.length + s2.length);
     combined.set(s1); combined.set(s2, s1.length);
-    const finalSecret = hkdf(sha256, combined, undefined, "trunex-hybrid-pqc", 32);
+    const finalSecret = hkdf(sha256, combined, undefined, new TextEncoder().encode("trunex-hybrid-pqc"), 32);
 
     // 4. Verify Signature (Dilithium)
     if (msg.dilithium_signature && peerDilithiumPub) {
@@ -360,7 +360,7 @@ export default function ChatPage() {
         // 3. Fusion (HKDF)
         const combined = new Uint8Array(s1.length + s2.length);
         combined.set(s1); combined.set(s2, s1.length);
-        const finalSecret = hkdf(sha256, combined, undefined, "trunex-hybrid-pqc", 32);
+        const finalSecret = hkdf(sha256, combined, undefined, new TextEncoder().encode("trunex-hybrid-pqc"), 32);
 
         // 4. AES-GCM Encryption (Simplified for brevity, using browser SubtleCrypto)
         const enc = new TextEncoder();
