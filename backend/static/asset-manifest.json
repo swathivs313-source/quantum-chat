@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/quantum-chat/static/css/main.c313efbe.css",
-    "main.js": "/quantum-chat/static/js/main.9d578eab.js",
+    "main.js": "/quantum-chat/static/js/main.b87d0a15.js",
     "index.html": "/quantum-chat/index.html",
     "main.c313efbe.css.map": "/quantum-chat/static/css/main.c313efbe.css.map",
-    "main.9d578eab.js.map": "/quantum-chat/static/js/main.9d578eab.js.map"
+    "main.b87d0a15.js.map": "/quantum-chat/static/js/main.b87d0a15.js.map"
   },
   "entrypoints": [
     "static/css/main.c313efbe.css",
-    "static/js/main.9d578eab.js"
+    "static/js/main.b87d0a15.js"
   ]
 }

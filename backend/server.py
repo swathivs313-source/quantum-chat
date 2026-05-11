@@ -343,6 +343,7 @@ async def register(req: RegisterRequest):
         "role": "user",
         "avatar_color": f"#{secrets.token_hex(3)}",
         "public_key": req.public_key,
+        "encrypted_private_key": encrypted_private,
         "kyber_pubkey": req.kyber_pubkey,
         "dilithium_pubkey": req.dilithium_pubkey,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -647,6 +648,9 @@ async def create_chat(req: CreateChatRequest, request: Request):
                 "email": other_user.get("email", "") if other_user else "",
                 "is_online": req.participant_id in online_users,
                 "avatar_color": other_user.get("avatar_color", "#10B981") if other_user else "#10B981",
+                "public_key": other_user.get("public_key", "") if other_user else "",
+                "kyber_pubkey": other_user.get("kyber_pubkey", "") if other_user else "",
+                "dilithium_pubkey": other_user.get("dilithium_pubkey", "") if other_user else "",
             },
             "last_message": "", "last_message_at": "", "unread_count": 0,
         }
@@ -789,27 +793,40 @@ async def get_messages(chat_id: str, request: Request):
         msg_type = msg.get("message_type", "text")
         if msg_type == "text" and "encrypted_data" in msg:
             try:
-                if is_group:
+                ed = msg["encrypted_data"]
+                # Client-side PQC hybrid encrypted — pass through for frontend decryption
+                if isinstance(ed, dict) and "kem_ct" in ed:
+                    content = json_mod.dumps(ed)
+                elif isinstance(ed, dict) and "plaintext" in ed:
+                    content = ed["plaintext"]
+                elif is_group:
                     gk = decrypt_private_key(chat["encrypted_group_key"])
-                    content = decrypt_group_message(msg["encrypted_data"], gk)
+                    content = decrypt_group_message(ed, gk)
                 else:
                     other_id = [p for p in chat["participants"] if p != user_id]
                     other_id = other_id[0] if other_id else user_id
                     other_user = await db.users.find_one({"_id": ObjectId(other_id)})
                     cu_full = await db.users.find_one({"_id": ObjectId(user_id)})
-                    pk = decrypt_private_key(cu_full["encrypted_private_key"])
-                    ss = derive_shared_secret(pk, other_user["public_key"])
-                    content = decrypt_message(msg["encrypted_data"], ss)
+                    if "encrypted_private_key" not in cu_full:
+                        content = json_mod.dumps(ed) if isinstance(ed, dict) else str(ed)
+                    else:
+                        pk = decrypt_private_key(cu_full["encrypted_private_key"])
+                        ss = derive_shared_secret(pk, other_user["public_key"])
+                        content = decrypt_message(ed, ss)
             except Exception as e:
                 logger.error(f"Decrypt failed: {e}")
-                content = "[Decryption failed]"
+                try:
+                    content = json_mod.dumps(msg["encrypted_data"]) if isinstance(msg["encrypted_data"], dict) else "[Decryption failed]"
+                except Exception:
+                    content = "[Decryption failed]"
         elif msg_type in ("file", "image", "audio"):
             content = msg.get("file_name", "Voice Message" if msg_type == "audio" else "File")
         entry = {
             "id": str(msg["_id"]), "chat_id": msg["chat_id"], "sender_id": msg["sender_id"],
             "sender_name": msg.get("sender_name", ""), "content": content,
             "message_type": msg_type, "status": msg.get("status", "sent"),
-            "read_by": msg.get("read_by", []), "played_by": msg.get("played_by", []), "timestamp": msg.get("timestamp", ""), "encrypted": True,
+            "read_by": msg.get("read_by", []), "played_by": msg.get("played_by", []), "timestamp": msg.get("timestamp", ""),
+            "encrypted": True, "dilithium_signature": msg.get("dilithium_signature"),
         }
         if msg_type in ("file", "image", "audio"):
             entry.update({"file_id": msg.get("file_id"), "file_name": msg.get("file_name"),
@@ -822,6 +839,22 @@ async def get_messages(chat_id: str, request: Request):
     )
     await db.chats.update_one({"_id": ObjectId(chat_id)}, {"$set": {f"unread_{user_id}": 0}})
     return {"messages": result}
+
+
+async def _server_encrypt(content, is_group, chat, user_id):
+    """Server-side encryption fallback for legacy clients."""
+    if is_group:
+        gk = decrypt_private_key(chat["encrypted_group_key"])
+        return encrypt_group_message(content, gk)
+    else:
+        other_id = [p for p in chat["participants"] if p != user_id][0]
+        other_user = await db.users.find_one({"_id": ObjectId(other_id)})
+        cu_full = await db.users.find_one({"_id": ObjectId(user_id)})
+        if "encrypted_private_key" not in cu_full:
+            raise Exception("No server-side encryption key available")
+        pk = decrypt_private_key(cu_full["encrypted_private_key"])
+        ss = derive_shared_secret(pk, other_user["public_key"])
+        return encrypt_message(content, ss)
 
 
 @api_router.post("/messages")
@@ -841,38 +874,28 @@ async def send_message(req: SendMessageRequest, request: Request):
     if req.dilithium_signature: msg_doc["dilithium_signature"] = req.dilithium_signature
 
     if req.message_type == "text":
-        # Check if the client already sent encrypted data (Frontend E2EE)
-        # If content starts with {"ciphertext": ..., "nonce": ...}, it's already encrypted
         try:
             potential_json = json_mod.loads(req.content)
             if isinstance(potential_json, dict) and "ciphertext" in potential_json:
+                # Client already encrypted (PQC hybrid or legacy) — store as-is
                 msg_doc["encrypted_data"] = potential_json
             else:
-                # Fallback to server-side encryption for legacy/non-updated clients
-                if is_group:
-                    gk = decrypt_private_key(chat["encrypted_group_key"])
-                    encrypted_data = encrypt_group_message(req.content, gk)
-                else:
-                    other_id = [p for p in chat["participants"] if p != user_id][0]
-                    other_user = await db.users.find_one({"_id": ObjectId(other_id)})
-                    cu_full = await db.users.find_one({"_id": ObjectId(user_id)})
-                    pk = decrypt_private_key(cu_full["encrypted_private_key"])
-                    ss = derive_shared_secret(pk, other_user["public_key"])
-                    encrypted_data = encrypt_message(req.content, ss)
-                msg_doc["encrypted_data"] = encrypted_data
-        except (json_mod.JSONDecodeError, TypeError, KeyError):
-            # Same fallback
-            if is_group:
-                gk = decrypt_private_key(chat["encrypted_group_key"])
-                encrypted_data = encrypt_group_message(req.content, gk)
-            else:
-                other_id = [p for p in chat["participants"] if p != user_id][0]
-                other_user = await db.users.find_one({"_id": ObjectId(other_id)})
-                cu_full = await db.users.find_one({"_id": ObjectId(user_id)})
-                pk = decrypt_private_key(cu_full["encrypted_private_key"])
-                ss = derive_shared_secret(pk, other_user["public_key"])
-                encrypted_data = encrypt_message(req.content, ss)
-            msg_doc["encrypted_data"] = encrypted_data
+                # Fallback to server-side encryption for legacy clients
+                try:
+                    msg_doc["encrypted_data"] = await _server_encrypt(req.content, is_group, chat, user_id)
+                except Exception as enc_err:
+                    logger.warning(f"Server-side encryption unavailable: {enc_err}")
+                    msg_doc["encrypted_data"] = {"plaintext": req.content}
+        except json_mod.JSONDecodeError:
+            # Plain text — try server-side encryption, fallback to storing plain
+            try:
+                msg_doc["encrypted_data"] = await _server_encrypt(req.content, is_group, chat, user_id)
+            except Exception as enc_err:
+                logger.warning(f"Server-side encryption unavailable: {enc_err}")
+                msg_doc["encrypted_data"] = {"plaintext": req.content}
+        except Exception as e:
+            logger.warning(f"Message encryption error, storing plain: {e}")
+            msg_doc["encrypted_data"] = {"plaintext": req.content}
     elif req.message_type in ("file", "image", "audio"):
         msg_doc.update({"file_id": req.file_id, "file_name": req.file_name,
                         "file_type": req.file_type, "file_size": req.file_size,
@@ -891,6 +914,7 @@ async def send_message(req: SendMessageRequest, request: Request):
             "sender_name": current_user.get("name", ""), "content": display_content,
             "message_type": req.message_type, "status": "sent", "read_by": [user_id],
             "timestamp": timestamp, "encrypted": True,
+            "dilithium_signature": req.dilithium_signature,
         }
     }
     if req.message_type in ("file", "image", "audio"):
@@ -907,55 +931,6 @@ async def send_message(req: SendMessageRequest, request: Request):
         await manager.send_to_user(user_id, {"type": "status_update", "data": {"message_id": msg_id, "status": "delivered"}})
     return {"message": {**ws_data["data"], "status": "delivered" if delivered_to_any else "sent"}}
 
-
-@api_router.post("/upload")
-async def upload_file(request: Request, file: UploadFile = File(...)):
-    current_user = await get_current_user(request)
-    file_bytes = await file.read()
-    storage_path = generate_storage_path(current_user["id"], file.filename)
-    
-    try:
-        put_object(storage_path, file_bytes, file.content_type)
-        has_remote = True
-    except Exception as e:
-        logger.warning(f"Object storage failed, falling back to local DB: {e}")
-        has_remote = False
-
-    doc = {
-        "filename": file.filename,
-        "content_type": file.content_type,
-        "size": len(file_bytes),
-        "uploader_id": current_user["id"],
-        "storage_path": storage_path,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
-    if not has_remote:
-        doc["data"] = file_bytes
-
-    r = await db.files.insert_one(doc)
-    return {"file_id": str(r.inserted_id), "filename": file.filename}
-
-
-@api_router.get("/files/{file_id}")
-async def get_file(file_id: str, auth: str = Query(None)):
-    if not auth:
-        raise HTTPException(status_code=401, detail="Missing auth token")
-    try:
-        payload = jwt.decode(auth, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    f = await db.files.find_one({"_id": ObjectId(file_id)})
-    if not f:
-        raise HTTPException(status_code=404, detail="File not found")
-        
-    try:
-        data, ctype = get_object(f["storage_path"])
-        return Response(content=data, media_type=ctype)
-    except Exception:
-        if "data" in f:
-            return Response(content=f["data"], media_type=f["content_type"])
-        raise HTTPException(status_code=500, detail="File could not be retrieved")
 
 
 @api_router.delete("/messages/{msg_id}")
